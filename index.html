@@ -1208,106 +1208,106 @@ POST /api/auth/teacher      - 教师登录验证</pre>
             }, systemConfig.syncInterval * 1000);
         }
         
-// 更新教师页面 - 修改为显示详细记录
-async function updateTeacherPage() {
-    await loadFromCloud();
-    
-    const selectedClass = teacherClassFilter.value;
-    let filteredRecords = attendanceHistory;
-    
-    if (selectedClass !== "all") {
-        filteredRecords = attendanceHistory.filter(record => record.session.class === selectedClass);
-    }
-    
-    teacherTotalEl.textContent = filteredRecords.length;
-    
-    let totalStudents = 0;
-    let totalRate = 0;
-    
-    if (filteredRecords.length > 0) {
-        filteredRecords.forEach(record => {
-            totalStudents += record.summary.total;
-            totalRate += record.summary.rate;
-        });
-        
-        const avgRate = Math.round(totalRate / filteredRecords.length);
-        teacherAvgRateEl.textContent = `${avgRate}%`;
-    } else {
-        teacherAvgRateEl.textContent = "0%";
-    }
-    
-    if (selectedClass === "all") {
-        teacherStudentsEl.textContent = Object.values(classesData).reduce((total, students) => total + students.length, 0);
-    } else {
-        teacherStudentsEl.textContent = classesData[selectedClass] ? classesData[selectedClass].length : 0;
-    }
-    
-    resultListEl.innerHTML = '';
-    
-    if (filteredRecords.length === 0) {
-        resultListEl.innerHTML = '<div style="text-align: center; padding: 40px; color: #64748b;">暂无点名记录</div>';
-        return;
-    }
-    
-    filteredRecords.forEach((record, index) => {
-        const resultItem = document.createElement('div');
-        resultItem.className = 'result-item';
-        
-        const classStudents = classesData[record.session.class] || [];
-        const presentStudents = classStudents.filter(student => record.attendance[student] === 'present');
-        const absentStudents = classStudents.filter(student => record.attendance[student] === 'absent');
-        const unmarkedStudents = classStudents.filter(student => !record.attendance[student] || record.attendance[student] === 'unmarked');
-        
-        resultItem.innerHTML = `
-            <div class="result-header">
-                <div>
-                    <strong>${record.session.name}</strong>
-                    <div class="result-time">${record.session.date} ${record.session.time}</div>
-                    <div style="margin-top: 5px;">
-                        <span class="class-badge">${record.session.class}</span>
-                    </div>
-                </div>
-                <div class="result-stats">
-                    <div class="result-stat">
-                        <div class="result-stat-value" style="color: #10b981;">${record.summary.present}</div>
-                        <div class="result-stat-label">已到</div>
-                    </div>
-                    <div class="result-stat">
-                        <div class="result-stat-value" style="color: #ef4444;">${record.summary.absent}</div>
-                        <div class="result-stat-label">未到</div>
-                    </div>
-                    <div class="result-stat">
-                        <div class="result-stat-value" style="color: #64748b;">${record.summary.unmarked}</div>
-                        <div class="result-stat-label">未标记</div>
-                    </div>
-                    <div class="result-stat">
-                        <div class="result-stat-value" style="color: #4f46e5;">${record.summary.rate}%</div>
-                        <div class="result-stat-label">到课率</div>
-                    </div>
-                </div>
-            </div>
-            <div>
-                <div><strong>已到学生 (${presentStudents.length})</strong></div>
-                <div class="result-students">
-                    ${presentStudents.map(student => `<div class="result-student present">${student}</div>`).join('')}
-                </div>
+// 更新教师页面
+        async function updateTeacherPage() {
+            await loadFromCloud();
+            
+            const selectedClass = teacherClassFilter.value;
+            let filteredRecords = attendanceHistory;
+            
+            if (selectedClass !== "all") {
+                filteredRecords = attendanceHistory.filter(record => record.session.class === selectedClass);
+            }
+            
+            teacherTotalEl.textContent = filteredRecords.length;
+            
+            let totalStudents = 0;
+            let totalRate = 0;
+            
+            if (filteredRecords.length > 0) {
+                filteredRecords.forEach(record => {
+                    totalStudents += record.summary.total;
+                    totalRate += record.summary.rate;
+                });
                 
-                <div style="margin-top: 15px;"><strong>未到学生 (${absentStudents.length})</strong></div>
-                <div class="result-students">
-                    ${absentStudents.map(student => `<div class="result-student absent">${student}</div>`).join('')}
-                </div>
+                const avgRate = Math.round(totalRate / filteredRecords.length);
+                teacherAvgRateEl.textContent = `${avgRate}%`;
+            } else {
+                teacherAvgRateEl.textContent = "0%";
+            }
+            
+            if (selectedClass === "all") {
+                teacherStudentsEl.textContent = Object.values(classesData).reduce((total, students) => total + students.length, 0);
+            } else {
+                teacherStudentsEl.textContent = classesData[selectedClass] ? classesData[selectedClass].length : 0;
+            }
+            
+            resultListEl.innerHTML = '';
+            
+            if (filteredRecords.length === 0) {
+                resultListEl.innerHTML = '<div style="text-align: center; padding: 40px; color: #64748b;">暂无点名记录</div>';
+                return;
+            }
+            
+            filteredRecords.forEach((record, index) => {
+                const resultItem = document.createElement('div');
+                resultItem.className = 'result-item';
                 
-                ${unmarkedStudents.length > 0 ? `
-                <div style="margin-top: 15px;"><strong>未标记学生 (${unmarkedStudents.length})</strong></div>
-                <div class="result-students">
-                    ${unmarkedStudents.map(student => `<div class="result-student" style="background-color: #f1f5f9; color: #64748b;">${student}</div>`).join('')}
-                </div>
-                ` : ''}
-            </div>
-        `;
-        resultListEl.appendChild(resultItem);
-    });
-}
+                const classStudents = classesData[record.session.class] || [];
+                const presentStudents = classStudents.filter(student => record.attendance[student] === 'present');
+                const absentStudents = classStudents.filter(student => record.attendance[student] === 'absent');
+                const unmarkedStudents = classStudents.filter(student => !record.attendance[student] || record.attendance[student] === 'unmarked');
+                
+                resultItem.innerHTML = `
+                    <div class="result-header">
+                        <div>
+                            <strong>${record.session.name}</strong>
+                            <div class="result-time">${record.session.date} ${record.session.time}</div>
+                            <div style="margin-top: 5px;">
+                                <span class="class-badge">${record.session.class}</span>
+                            </div>
+                        </div>
+                        <div class="result-stats">
+                            <div class="result-stat">
+                                <div class="result-stat-value" style="color: #10b981;">${record.summary.present}</div>
+                                <div class="result-stat-label">已到</div>
+                            </div>
+                            <div class="result-stat">
+                                <div class="result-stat-value" style="color: #ef4444;">${record.summary.absent}</div>
+                                <div class="result-stat-label">未到</div>
+                            </div>
+                            <div class="result-stat">
+                                <div class="result-stat-value" style="color: #64748b;">${record.summary.unmarked}</div>
+                                <div class="result-stat-label">未标记</div>
+                            </div>
+                            <div class="result-stat">
+                                <div class="result-stat-value" style="color: #4f46e5;">${record.summary.rate}%</div>
+                                <div class="result-stat-label">到课率</div>
+                            </div>
+                        </div>
+                    </div>
+                    <div>
+                        <div><strong>已到学生 (${presentStudents.length})</strong></div>
+                        <div class="result-students">
+                            ${presentStudents.map(student => `<div class="result-student present">${student}</div>`).join('')}
+                        </div>
+                        
+                        <div style="margin-top: 15px;"><strong>未到学生 (${absentStudents.length})</strong></div>
+                        <div class="result-students">
+                            ${absentStudents.map(student => `<div class="result-student absent">${student}</div>`).join('')}
+                        </div>
+                        
+                        ${unmarkedStudents.length > 0 ? `
+                        <div style="margin-top: 15px;"><strong>未标记学生 (${unmarkedStudents.length})</strong></div>
+                        <div class="result-students">
+                            ${unmarkedStudents.map(student => `<div class="result-student" style="background-color: #f1f5f9; color: #64748b;">${student}</div>`).join('')}
+                        </div>
+                        ` : ''}
+                    </div>
+                `;
+                resultListEl.appendChild(resultItem);
+            });
+        }
         
        // 导出记录 - 修改为包含未到人员详细名单
 function exportRecords() {
