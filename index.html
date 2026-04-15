@@ -1309,38 +1309,28 @@ POST /api/auth/teacher      - 教师登录验证</pre>
             });
         }
         
-       // 导出记录 - 修改为包含未到人员详细名单
-function exportRecords() {
-    if (attendanceHistory.length === 0) {
-        alert("暂无点名记录可导出");
-        return;
-    }
-    
-    // 创建CSV表头
-    let csvContent = "点名名称,班级,日期,时间,总人数,已到人数,未到人数,未标记人数,到课率,未到人员名单\n";
-    
-    attendanceHistory.forEach(record => {
-        const classStudents = classesData[record.session.class] || [];
-        const absentStudents = classStudents.filter(student => record.attendance[student] === 'absent');
-        
-        // 将未到人员用逗号连接成一个字符串
-        const absentStudentsStr = absentStudents.map(student => student).join('、');
-        
-        // 将未到人员名单用引号括起来，避免CSV中逗号分隔问题
-        const escapedAbsentStr = '"' + absentStudentsStr.replace(/"/g, '""') + '"';
-        
-        csvContent += `"${record.session.name}","${record.session.class}",${record.session.date},${record.session.time},${record.summary.total},${record.summary.present},${record.summary.absent},${record.summary.unmarked},${record.summary.rate}%,${escapedAbsentStr}\n`;
-    });
-    
-    const blob = new Blob(['\ufeff' + csvContent], { type: 'text/csv;charset=utf-8;' });
-    const url = URL.createObjectURL(blob);
-    const link = document.createElement("a");
-    link.href = url;
-    link.download = `点名记录_${new Date().toISOString().slice(0, 10)}.csv`;
-    link.click();
-    
-    URL.revokeObjectURL(url);
-}
+               // 导出记录
+        function exportRecords() {
+            if (attendanceHistory.length === 0) {
+                alert("暂无点名记录可导出");
+                return;
+            }
+            
+            let csvContent = "点名名称,班级,日期,时间,总人数,已到人数,未到人数,未标记人数,到课率\n";
+            
+            attendanceHistory.forEach(record => {
+                csvContent += `"${record.session.name}","${record.session.class}",${record.session.date},${record.session.time},${record.summary.total},${record.summary.present},${record.summary.absent},${record.summary.unmarked},${record.summary.rate}%\n`;
+            });
+            
+            const blob = new Blob(['\ufeff' + csvContent], { type: 'text/csv;charset=utf-8;' });
+            const url = URL.createObjectURL(blob);
+            const link = document.createElement("a");
+            link.href = url;
+            link.download = `点名记录_${new Date().toISOString().slice(0, 10)}.csv`;
+            link.click();
+            
+            URL.revokeObjectURL(url);
+        }
         
         // 清空所有记录
         async function clearAllRecords() {
